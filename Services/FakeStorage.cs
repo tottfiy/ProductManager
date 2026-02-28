@@ -10,8 +10,8 @@ namespace Services
 {
     public static class FakeStorage
     {
-        static List<WarehouseEntity> Warehouses { get; }
-        static List<ProductEntity> Products { get; }
+        public static List<WarehouseEntity> Warehouses { get; }
+        public static List<ProductEntity> Products { get; }
 
         static FakeStorage()
         {
@@ -39,19 +39,20 @@ namespace Services
                 // 10 products for warehouse1
                 new ProductEntity(1, "Laptop Dell XPS", 5, warehouse1.Guid, 45000, ProductCategory.Electronics, "High-end ultrabook"),
                 new ProductEntity(2, "iPhone 15", 8, warehouse1.Guid, 52000, ProductCategory.Electronics, "Apple smartphone"),
-                new ProductEntity(3, "Булочка з корицею", 400, warehouse1.Guid, 24.99m, ProductCategory.Electronics, "Smart TV 4K"),
-                new ProductEntity(4, "Office Chair", 15, warehouse1.Guid, 3500, ProductCategory.Furniture, "Ergonomic chair"),
+                new ProductEntity(3, "Булочка з корицею", 400, warehouse1.Guid, 24.99m, ProductCategory.Food, "З Сільпо"),
+                new ProductEntity(4, "Рево Жовте", 105, warehouse1.Guid, 56, ProductCategory.Food, "Подільська смаковинка"),
                 new ProductEntity(5, "Desk Table", 10, warehouse1.Guid, 7000, ProductCategory.Furniture, "Wooden office desk"),
                 new ProductEntity(6, "Wireless Mouse", 25, warehouse1.Guid, 900, ProductCategory.Electronics, "Logitech mouse"),
                 new ProductEntity(7, "Keyboard Mechanical", 12, warehouse1.Guid, 2500, ProductCategory.Electronics, "RGB keyboard"),
-                new ProductEntity(8, "Power Drill", 6, warehouse1.Guid, 4200, ProductCategory.Tools, "Bosch drill"),
+                new ProductEntity(8, "Барабанні палички Vater", 6, warehouse1.Guid, 610, ProductCategory.Tools, "Мої улюблені"),
                 new ProductEntity(9, "Winter Jacket", 20, warehouse1.Guid, 2800, ProductCategory.Clothing, "Men jacket"),
                 new ProductEntity(10, "Sneakers Nike", 18, warehouse1.Guid, 3200, ProductCategory.Clothing, "Sport shoes"),
 
                 // 2 products for warehouse2
-                new ProductEntity(11, "Milk 1L", 50, warehouse2.Guid, 45, ProductCategory.Food, "Fresh milk"),
-                new ProductEntity(12, "Chocolate Bar", 100, warehouse2.Guid, 35, ProductCategory.Food, "Dark chocolate")
-            }
+                new ProductEntity(11, "Круасан", 500, warehouse2.Guid, 45, ProductCategory.Food, "Пухкенькі"),
+                new ProductEntity(12, "Салат айсберг", 100, warehouse2.Guid, 25.5m, ProductCategory.Food, "Iceberg")
+            };
+                // Warehouse 3 is empty
         }
     }
 }
