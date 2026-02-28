@@ -5,15 +5,15 @@ using System.Text;
 
 namespace StorageModels.Entities
 {
-    public class Product
+    public class ProductEntity
     {
         // Fields
         private readonly Guid _guid;
-        public int _id;
-        public Guid _storageGuid;
+        private int _id;
+        private Guid _storageGuid;
         private string _name;
         private int _quantity;
-        private double _price;
+        private decimal _price;
         private ProductCategory _productCategory;
         private string? _description;
 
@@ -43,7 +43,7 @@ namespace StorageModels.Entities
             set { _quantity = value; }
         }
 
-        public double Price
+        public decimal Price
         {
             get { return _price; }
             set { _price = value; }
@@ -58,13 +58,10 @@ namespace StorageModels.Entities
             get { return _description; }
             set { _description = value; }
         }
-        public double TotalValue
-        {
-            get { return Price * Quantity; }
-        }
+
 
         // Constructor
-        public Product(int id, string name, int quantity, Guid storageGuid, double price, ProductCategory productCategory, string? description = null)
+        public ProductEntity(int id, string name, int quantity, Guid storageGuid, decimal price, ProductCategory productCategory, string? description = null)
         {
             _guid = Guid.NewGuid();
             _id = id;

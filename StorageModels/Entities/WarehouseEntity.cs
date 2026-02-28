@@ -5,7 +5,7 @@ using System.Text;
 
 namespace StorageModels.Entities
 {
-    public class Storage
+    public class WarehouseEntity
     {
         // Fields
         private readonly Guid _guid;
@@ -37,10 +37,10 @@ namespace StorageModels.Entities
         }
         
         // Constructor
-        public Storage(int id, string name, Location location)
+        public WarehouseEntity(int id, string name, Location location)
         {
             _guid = Guid.NewGuid();
-            _id = Id;
+            _id = id;
             _name = name;
             _location = location;
         }
