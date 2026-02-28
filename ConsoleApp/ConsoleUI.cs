@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 using Services;
 
@@ -8,70 +7,144 @@ namespace ConsoleApp
     internal class ConsoleUI
     {
         internal static StorageService _storageService = new StorageService();
+
         static void Main(string[] args)
         {
             Console.OutputEncoding = Encoding.UTF8;
             Console.InputEncoding = Encoding.UTF8;
 
-            Console.Clear();
-            Console.WriteLine("МЕНЕДЖЕР ПРОДУКТІВ");
-            Console.WriteLine("1. Показати усі склади");
-            Console.WriteLine("2. Вихід з програми");
-            Console.WriteLine("\nВведіть номер вашого вибору: ");
+            RunMainMenu();
+        }
 
-            string choice = Console.ReadLine();
-
-            switch (choice)
+        static void RunMainMenu()
+        {
+            while (true)
             {
-                case "1":
-                    ShowWarehouseMenu();
-                    break;
-                case "2":
-                    break;
-                default:
-                    Console.WriteLine("Неправильний вибір. Спробуйте ще раз: ");
-                    Console.ReadKey();
-                    break;
+                Console.Clear();
+                Console.WriteLine("   МЕНЕДЖЕР ПРОДУКТІВ\n");
+                Console.WriteLine("1. Показати усі склади");
+                Console.WriteLine("2. Вихід з програми");
+                Console.Write("\nВведіть ваш вибір: ");
+
+                string choice = Console.ReadLine();
+
+                switch (choice)
+                {
+                    case "1":
+                        ShowWarehouseMenu();
+                        break;
+                    case "2":
+                        return;
+                    default:
+                        Console.WriteLine("Неправильний вибір,");
+                        Console.WriteLine("Спробуйте ще раз: ");
+                        Console.ReadKey();
+                        break;
+                }
             }
         }
 
         static void ShowWarehouseMenu()
         {
-            Console.Clear();
-            Console.WriteLine("СПИСОК СКЛАДІВ");
-
-            var warehouses = _storageService.GetWarehouses();
-
-            foreach (var warehouse in warehouses)
+            while (true)
             {
-                warehouse.Display();
-            }
+                Console.Clear();
+                Console.WriteLine("   СПИСОК СКЛАДІВ\n");
 
-            Console.WriteLine("\nДля детальної інформації про склад введіть його 'ID'" +
-                "\nДля повернення натисність 'q': ");
+                var warehouses = _storageService.GetWarehouses();
 
-            string choice = Console.ReadLine();
+                foreach (var warehouse in warehouses)
+                {
+                    warehouse.Display();
+                }
 
-            if (choice? == "q") return;
+                Console.WriteLine("\nДля детальної інформації про склад введіть його 'ID'");
+                Console.WriteLine("Для повернення натисність 'q':");
+                Console.Write("\nВведіть вибір: ");
 
-            if (int.TryParse(choice, out int Id))
-            {
-                
-            }
-            else
-            {
-                Console.WriteLine("Неправильно введений 'ID'");
-                Console.WriteLine("Спробуйте ще раз: ");
-                Console.ReadLine();
+                string choice = Console.ReadLine();
+
+                if (choice?.ToLower() == "q")
+                    return;
+
+                if (int.TryParse(choice, out int id))
+                {
+                    ShowDetailsOnWarehouse(id);
+                }
+                else
+                {
+                    Console.WriteLine("Невірний 'ID'");
+                    Console.ReadKey();
+                }
             }
         }
 
         static void ShowDetailsOnWarehouse(int id)
         {
-            Console.Clear();
-            var warehouse = _storageService.GetWarehouseById(id);
+            while (true)
+            {
+                Console.Clear();
 
-            warehouse.DisplayWithProducts
+                var warehouse = _storageService.GetWarehouseById(id);
+
+                if (warehouse == null)
+                {
+                    Console.WriteLine("Склад не знайдено.");
+                    Console.ReadKey();
+                    return;
+                }
+
+                Console.WriteLine("   ДЕТАЛІ СКЛАДУ\n");
+                warehouse.DisplayDetailed();
+
+                var products = _storageService.GetProductsByWarehouse(warehouse.Guid);
+
+                Console.WriteLine("\n   ПРОДУКТИ\n");
+
+                foreach (var product in warehouse.Products)
+                {
+                    product.DisplayShort();
+                }
+
+                Console.WriteLine("\nВведіть ID продукту для деталей");
+                Console.WriteLine("Для повернення натисність 'q'");
+                Console.Write("\nВведіть вибір: ");
+
+                string choice = Console.ReadLine();
+
+                if (choice?.ToLower() == "q")
+                    return;
+
+                if (int.TryParse(choice, out int productId))
+                {
+                    ShowProductDetails(productId);
+                }
+                else
+                {
+                    Console.WriteLine("Невірний 'ID'");
+                    Console.ReadLine();
+                }
+            }
+        }
+
+        static void ShowProductDetails(int id)
+        {
+            Console.Clear();
+
+            var product = _storageService.GetProductById(id);
+
+            if (product == null)
+            {
+                Console.WriteLine("Продукт не знайдено.");
+            }
+            else
+            {
+                Console.WriteLine("   ДЕТАЛІ ПРОДУКТУ\n");
+                product.DisplayFull();
+            }
+
+            Console.WriteLine("\nНатисніть будь-яку клавішу для повернення.");
+            Console.ReadKey();
         }
     }
 }

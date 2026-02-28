@@ -8,10 +8,10 @@ using StorageModels.Enums;
 
 namespace Services
 {
-    public static class FakeStorage
+    internal static class FakeStorage
     {
-        public static List<WarehouseEntity> Warehouses { get; }
-        public static List<ProductEntity> Products { get; }
+        internal static List<WarehouseEntity> Warehouses { get; }
+        internal static List<ProductEntity> Products { get; }
 
         static FakeStorage()
         {

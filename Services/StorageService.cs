@@ -17,7 +17,13 @@ namespace Services
         public WarehouseViewModel? GetWarehouseById(int id)
         {
             var warehouse = FakeStorage.Warehouses.FirstOrDefault(w => w.Id == id);
-            return warehouse != null ? new WarehouseViewModel(warehouse) : null;
+
+            if (warehouse == null)
+                return null;
+
+            var vm = new WarehouseViewModel(warehouse);
+            vm.LoadProducts(GetProductsByWarehouse(vm.Guid)); 
+            return vm;
         }
 
         public IEnumerable<ProductViewModel> GetProductsByWarehouse(Guid warehouseGuid)
@@ -27,5 +33,11 @@ namespace Services
                 .Select(product => new ProductViewModel(product))
                 .ToList();
         }
+        public ProductViewModel? GetProductById(int id)
+        {
+            var product = FakeStorage.Products.FirstOrDefault(p => p.Id == id);
+            return product != null ? new ProductViewModel(product) : null;
+        }
+
     }
 }
