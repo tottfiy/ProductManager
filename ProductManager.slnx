@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="ConsoleApp/ConsoleApp.csproj" />
+  <Project Path="Services/Services.csproj" />
+  <Project Path="StorageModels/StorageModels.csproj" />
+  <Project Path="ViewModels/ViewModels.csproj" />
+</Solution>
