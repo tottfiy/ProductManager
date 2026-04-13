@@ -1,0 +1,13 @@
+<Page x:Class="UIModels.Pages.ProductDetailsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <StackPanel>
+        <Button Content="Back" Click="Back_Click"/>
+
+        <TextBlock x:Name="NameText"/>
+        <TextBlock x:Name="QuantityText"/>
+        <TextBlock x:Name="CategoryText"/>
+    </StackPanel>
+
+</Page>

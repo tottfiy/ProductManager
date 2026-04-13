@@ -1,0 +1,12 @@
+<Page x:Class="UIModels.Pages.HomePage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <StackPanel>
+        <TextBlock Text="Warehouses" FontSize="20"/>
+
+        <ListBox x:Name="WarehousesList"
+                 SelectionChanged="WarehousesList_SelectionChanged"/>
+    </StackPanel>
+
+</Page>
