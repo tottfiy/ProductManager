@@ -1,0 +1,10 @@
+<Window x:Class="UIModels.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Product Manager — Warehouse Storage"
+        Height="520" Width="860"
+        WindowStartupLocation="CenterScreen">
+
+    <Frame x:Name="MainFrame" NavigationUIVisibility="Hidden"/>
+
+</Window>
