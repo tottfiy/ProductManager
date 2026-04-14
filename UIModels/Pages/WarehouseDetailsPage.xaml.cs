@@ -1,36 +1,49 @@
-
+using Microsoft.Extensions.DependencyInjection;
 using Services;
-using StorageModels.Entities;
 using System.Windows;
 using System.Windows.Controls;
-using Microsoft.Extensions.DependencyInjection;
+using ViewModels;
 
 namespace UIModels.Pages
 {
+
+    // сторінка для виволу всіх складів
+
     public partial class WarehouseDetailsPage : Page
     {
         private readonly IStorageService _storageService;
-        private readonly int _id;
+        private readonly int _warehouseId;
 
-        public WarehouseDetailsPage(int id)
+        public WarehouseDetailsPage(int warehouseId)
         {
             InitializeComponent();
-            _id = id;
-            _storageService = App.ServiceProvider.GetService<IStorageService>();
+            _warehouseId = warehouseId;
+
+
+            _storageService = App.ServiceProvider.GetRequiredService<IStorageService>();
+
             LoadData();
         }
 
+
         private void LoadData()
         {
-            var warehouse = _storageService.GetWarehouseById(_id);
-            NameText.Text = warehouse.Name;
+            // з минулого апдейту змінив повернення GetWarehouseById на правильний тип WarehouseViewModel
+            WarehouseViewModel? warehouse = _storageService.GetWarehouseById(_warehouseId);
+
+            if (warehouse == null)
+                return;
+
+            NameText.Text = $"Warehouse: {warehouse.Name}";
+            LocationText.Text = $"Location: {warehouse.Location}";
+            TotalValueText.Text = $"Total inventory value: {warehouse.TotalValue:C2}";
+
             ProductsList.ItemsSource = warehouse.Products;
         }
 
         private void ProductsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var product = (ProductEntity)ProductsList.SelectedItem;
-            if (product != null)
+            if (ProductsList.SelectedItem is ProductViewModel product)
             {
                 NavigationService.Navigate(new ProductDetailsPage(product.Id));
             }
