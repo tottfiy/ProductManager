@@ -6,26 +6,25 @@ using ViewModels;
 
 namespace Services
 {
-    public class StorageService
+    public class StorageService : IStorageService
     {
         public IEnumerable<WarehouseViewModel> GetWarehouses()
         {
-            return FakeStorage.Warehouses.Select(
-                warehouse => new WarehouseViewModel(warehouse)).ToList();
+            return FakeStorage.Warehouses
+                .Select(warehouse => new WarehouseViewModel(warehouse))
+                .ToList();
         }
-
         public WarehouseViewModel? GetWarehouseById(int id)
         {
-            var warehouse = FakeStorage.Warehouses.FirstOrDefault(w => w.Id == id);
+            WarehouseEntity? warehouse = FakeStorage.Warehouses.FirstOrDefault(w => w.Id == id);
 
             if (warehouse == null)
                 return null;
 
             var vm = new WarehouseViewModel(warehouse);
-            vm.LoadProducts(GetProductsByWarehouse(vm.Guid)); 
+            vm.LoadProducts(GetProductsByWarehouse(vm.Guid));
             return vm;
         }
-
         public IEnumerable<ProductViewModel> GetProductsByWarehouse(Guid warehouseGuid)
         {
             return FakeStorage.Products
@@ -35,9 +34,8 @@ namespace Services
         }
         public ProductViewModel? GetProductById(int id)
         {
-            var product = FakeStorage.Products.FirstOrDefault(p => p.Id == id);
+            ProductEntity? product = FakeStorage.Products.FirstOrDefault(p => p.Id == id);
             return product != null ? new ProductViewModel(product) : null;
         }
-
     }
 }
