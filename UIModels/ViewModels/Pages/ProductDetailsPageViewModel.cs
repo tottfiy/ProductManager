@@ -14,6 +14,7 @@ public class ProductDetailsPageViewModel : ViewModelBase
         var product = storageService.GetProductDetails(productId);
         if (product is null)
         {
+            Id = 0;
             Name = "Товар не знайдено";
             CategoryName = "—";
             Quantity = 0;
@@ -24,6 +25,7 @@ public class ProductDetailsPageViewModel : ViewModelBase
             return;
         }
 
+        Id = product.Id;
         Name = product.Name;
         CategoryName = product.CategoryName;
         Quantity = product.Quantity;
@@ -33,12 +35,13 @@ public class ProductDetailsPageViewModel : ViewModelBase
         WarehouseName = product.WarehouseName;
     }
 
+    public int Id { get; }
     public string Name { get; }
     public string CategoryName { get; }
     public int Quantity { get; }
     public decimal Price { get; }
     public decimal TotalValue { get; }
-    public string Description { get; }
+    public string? Description { get; }
     public string WarehouseName { get; }
     public RelayCommand BackCommand { get; }
 }

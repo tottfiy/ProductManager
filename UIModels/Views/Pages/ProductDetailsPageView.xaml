@@ -11,7 +11,8 @@
 
         <StackPanel>
             <TextBlock Text="{Binding Name}" FontSize="24" FontWeight="Bold" Margin="0,0,0,12" />
-            <TextBlock Text="{Binding WarehouseName, StringFormat=Склад: {0}}" Margin="0,2,0,0" />
+            <TextBlock Text="{Binding Id, StringFormat=ID: {0}}" Margin="0,2,0,0" />
+            <TextBlock Text="{Binding WarehouseName, StringFormat=Склад: {0}}" Margin="0,4,0,0" />
             <TextBlock Text="{Binding CategoryName, StringFormat=Категорія: {0}}" Margin="0,4,0,0" />
             <TextBlock Text="{Binding Quantity, StringFormat=Кількість: {0}}" Margin="0,4,0,0" />
             <TextBlock Text="{Binding Price, StringFormat=Ціна за одиницю: {0:C2}}" Margin="0,4,0,0" />

@@ -17,9 +17,10 @@ public class WarehouseDetailsPageViewModel : ViewModelBase
         BackCommand = new RelayCommand(_navigationService.GoBack, () => _navigationService.CanGoBack);
         _navigationService.NavigationChanged += () => BackCommand.RaiseCanExecuteChanged();
 
-        var warehouse = storageService.GetWarehouseDetails(warehouseId);
+        WarehouseDetailsDto? warehouse = storageService.GetWarehouseDetails(warehouseId);
         if (warehouse is null)
         {
+            Id = 0;
             Name = "Склад не знайдено";
             LocationName = "—";
             TotalValue = 0m;
@@ -27,12 +28,14 @@ public class WarehouseDetailsPageViewModel : ViewModelBase
             return;
         }
 
+        Id = warehouse.Id;
         Name = warehouse.Name;
         LocationName = warehouse.LocationName;
         TotalValue = warehouse.TotalValue;
         Products = new ObservableCollection<ProductListDto>(warehouse.Products);
     }
 
+    public int Id { get; }
     public string Name { get; }
     public string LocationName { get; }
     public decimal TotalValue { get; }

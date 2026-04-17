@@ -1,3 +1,4 @@
+using Microsoft.Extensions.DependencyInjection;
 using UIModels.ViewModels.Pages;
 
 namespace UIModels.Navigation;
@@ -28,7 +29,7 @@ public class NavigationService : INavigationService
 
     public void ShowHome(bool clearHistory = false)
     {
-        var viewModel = (HomePageViewModel)_serviceProvider.GetService(typeof(HomePageViewModel))!;
+        HomePageViewModel viewModel = _serviceProvider.GetRequiredService<HomePageViewModel>();
 
         if (clearHistory)
         {
