@@ -1,14 +1,13 @@
 using System.Windows;
+using UIModels.ViewModels;
 
-namespace UIModels
+namespace UIModels;
+
+public partial class MainWindow : Window
 {
-    // навігація мід сторінками
-    public partial class MainWindow : Window
+    public MainWindow(MainWindowViewModel viewModel)
     {
-        public MainWindow()
-        {
-            InitializeComponent();
-            MainFrame.Navigate(new Pages.HomePage());
-        }
+        InitializeComponent();
+        DataContext = viewModel;
     }
 }

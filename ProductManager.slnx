@@ -1,8 +1,6 @@
 <Solution>
-  <Project Path="ConsoleApp/ConsoleApp.csproj" />
-  <Project Path="Repository/Repositories.csproj" Id="fbfa5ce4-a3b2-43f8-9f56-ef949883192b" />
+  <Project Path="Repositories/Repositories.csproj" />
   <Project Path="Services/Services.csproj" />
   <Project Path="StorageModels/StorageModels.csproj" />
-  <Project Path="UIModels/UIApp.csproj" Id="d489ed62-7e58-45f6-bddd-e9c50cea24b4" />
-  <Project Path="ViewModels/ViewModels.csproj" />
+  <Project Path="UIModels/UIModels.csproj" />
 </Solution>

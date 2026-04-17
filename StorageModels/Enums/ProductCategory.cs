@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+namespace StorageModels.Enums;
 
-namespace StorageModels.Enums
+public enum ProductCategory
 {
-    public enum ProductCategory
-    {
-        Electronics = 1,
-        Clothing = 2,   
-        Food = 3,
-        Furniture = 4,
-        Tools = 5,
-        Toys = 6
-    }
+    Electronics = 1,
+    Clothing = 2,
+    Food = 3,
+    Furniture = 4,
+    Tools = 5,
+    Toys = 6
 }
