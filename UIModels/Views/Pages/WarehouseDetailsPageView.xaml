@@ -1,87 +1,451 @@
 <UserControl x:Class="UIModels.Views.Pages.WarehouseDetailsPageView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <DockPanel>
-        <Button DockPanel.Dock="Top"
-                Content="← Back"
-                HorizontalAlignment="Left"
-                Padding="12,6"
-                Margin="0,0,0,16"
-                Command="{Binding BackCommand}" />
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Loaded="OnLoaded"
+             DataContextChanged="OnDataContextChanged">
+    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Disabled">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
 
-        <StackPanel DockPanel.Dock="Top" Margin="0,0,0,16">
-            <TextBlock Text="{Binding Name}" FontSize="24" FontWeight="Bold" />
-            <TextBlock Text="{Binding Id, StringFormat=ID: {0}}" Margin="0,8,0,0" />
-            <TextBlock Text="{Binding LocationName, StringFormat=Локація: {0}}" Margin="0,4,0,0" />
-            <TextBlock Text="{Binding TotalValue, StringFormat=Загальна вартість залишків: {0:C2}}" Margin="0,4,0,0" />
-        </StackPanel>
+            <StackPanel Grid.Row="0"
+                        Orientation="Horizontal"
+                        Margin="0,0,0,16">
+                <Button Content="← Назад"
+                        Padding="12,6"
+                        Margin="0,0,8,0"
+                        Command="{Binding BackCommand}" />
+                <Button Content="Редагувати"
+                        Padding="12,6"
+                        Margin="0,0,8,0"
+                        Command="{Binding EditCommand}" />
+                <Button Content="Скасувати"
+                        Padding="12,6"
+                        Margin="0,0,8,0"
+                        Command="{Binding CancelEditCommand}" />
+                <Button Content="Зберегти"
+                        Padding="12,6"
+                        Margin="0,0,8,0"
+                        Command="{Binding SaveCommand}" />
+                <Button Content="Оновити"
+                        Padding="12,6"
+                        Margin="0,0,8,0"
+                        Command="{Binding RefreshCommand}" />
+                <Button Content="Видалити склад"
+                        Padding="12,6"
+                        Command="{Binding DeleteWarehouseCommand}" />
+            </StackPanel>
 
-        <TextBlock DockPanel.Dock="Top"
-                   Text="Products"
-                   FontSize="20"
-                   FontWeight="SemiBold"
-                   Margin="0,0,0,12" />
+            <Border Grid.Row="1"
+                    Margin="0,0,0,16"
+                    Padding="16"
+                    Background="#FFF8F8F8"
+                    CornerRadius="8"
+                    BorderBrush="#FFE1E1E1"
+                    BorderThickness="1">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="130" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
 
-        <ListBox ItemsSource="{Binding Products}"
-                 SelectedItem="{Binding SelectedProduct, Mode=TwoWay}"
-                 BorderThickness="0"
-                 Background="Transparent"
-                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-            <ListBox.ItemContainerStyle>
-                <Style TargetType="ListBoxItem">
-                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                    <Setter Property="VerticalContentAlignment" Value="Stretch" />
-                    <Setter Property="Padding" Value="0" />
-                    <Setter Property="Margin" Value="0,0,0,10" />
-                </Style>
-            </ListBox.ItemContainerStyle>
+                    <TextBlock Grid.Row="0"
+                               Grid.Column="0"
+                               Text="Режим"
+                               FontWeight="SemiBold"
+                               Margin="0,0,12,10" />
+                    <TextBlock Grid.Row="0"
+                               Grid.Column="1"
+                               Text="{Binding Title}"
+                               FontSize="20"
+                               FontWeight="Bold"
+                               Margin="0,0,0,10" />
 
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <Border Padding="12"
-                            Background="#FFF8F8F8"
-                            CornerRadius="8"
-                            BorderBrush="#FFE1E1E1"
-                            BorderThickness="1"
-                            HorizontalAlignment="Stretch">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="2.2*" />
-                                <ColumnDefinition Width="1.1*" />
-                                <ColumnDefinition Width="1.0*" />
-                                <ColumnDefinition Width="1.3*" />
-                            </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Row="1"
+                               Grid.Column="0"
+                               Text="ID"
+                               FontWeight="SemiBold"
+                               Margin="0,0,12,10" />
+                    <TextBlock Grid.Row="1"
+                               Grid.Column="1"
+                               Text="{Binding DisplayId}"
+                               Margin="0,0,0,10" />
 
-                            <StackPanel Grid.Column="0"
-                                        VerticalAlignment="Center">
-                                <TextBlock Text="{Binding Name}"
-                                           FontSize="17"
-                                           FontWeight="SemiBold"
-                                           TextWrapping="Wrap" />
-                                <TextBlock Text="{Binding CategoryName, StringFormat=Категорія: {0}}"
-                                           Margin="0,4,0,0" />
-                            </StackPanel>
+                    <TextBlock Grid.Row="2"
+                               Grid.Column="0"
+                               Text="Назва"
+                               FontWeight="SemiBold"
+                               Margin="0,0,12,10" />
+                    <TextBox Grid.Row="2"
+                             Grid.Column="1"
+                             Height="34"
+                             Padding="10,6"
+                             Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                             IsReadOnly="{Binding IsReadOnlyMode}"
+                             Margin="0,0,0,10" />
 
-                            <TextBlock Grid.Column="1"
-                                       HorizontalAlignment="Center"
-                                       VerticalAlignment="Center"
-                                       Text="{Binding Quantity, StringFormat=Кількість: {0}}" />
+                    <TextBlock Grid.Row="3"
+                               Grid.Column="0"
+                               Text="Локація"
+                               FontWeight="SemiBold"
+                               Margin="0,0,12,10" />
+                    <ComboBox Grid.Row="3"
+                              Grid.Column="1"
+                              Height="34"
+                              ItemsSource="{Binding Locations}"
+                              SelectedItem="{Binding SelectedLocation}"
+                              IsEnabled="{Binding IsEditMode}"
+                              Margin="0,0,0,10" />
+                </Grid>
+            </Border>
 
-                            <TextBlock Grid.Column="2"
-                                       HorizontalAlignment="Center"
-                                       VerticalAlignment="Center"
-                                       Text="{Binding Price, StringFormat=Ціна: {0:C2}}" />
+            <Grid Grid.Row="2" Margin="0,0,0,12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*" />
+                    <ColumnDefinition Width="220" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
 
-                            <TextBlock Grid.Column="3"
-                                       HorizontalAlignment="Right"
-                                       VerticalAlignment="Center"
-                                       FontWeight="SemiBold"
-                                       TextAlignment="Right"
-                                       Text="{Binding TotalValue, StringFormat=Вартість: {0:C2}}" />
-                        </Grid>
-                    </Border>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
-    </DockPanel>
+                <TextBox Grid.Column="0"
+                         Height="34"
+                         Padding="10,6"
+                         VerticalContentAlignment="Center"
+                         Text="{Binding ProductSearchText, UpdateSourceTrigger=PropertyChanged}" />
+
+                <ComboBox Grid.Column="1"
+                          Margin="12,0,0,0"
+                          Height="34"
+                          ItemsSource="{Binding ProductSortOptions}"
+                          SelectedItem="{Binding SelectedProductSortOption}" />
+
+                <TextBlock Grid.Column="2"
+                           Margin="12,0,0,0"
+                           VerticalAlignment="Center"
+                           FontWeight="SemiBold"
+                           Text="{Binding TotalValue, StringFormat=Загальна вартість: {0:C2}}" />
+            </Grid>
+
+            <StackPanel Grid.Row="3"
+                        Margin="0,0,0,12">
+                <TextBlock Text="Товари складу"
+                           FontSize="20"
+                           FontWeight="SemiBold" />
+                <TextBlock Text="{Binding ProductSectionHint}"
+                           Foreground="#FF666666"
+                           Margin="0,4,0,8"
+                           TextWrapping="Wrap" />
+                <WrapPanel>
+                    <Button Content="Додати новий товар"
+                            Padding="12,6"
+                            Margin="0,0,8,8"
+                            Command="{Binding AddNewProductCommand}" />
+                    <Button Content="Додати існуючий товар"
+                            Padding="12,6"
+                            Margin="0,0,8,8"
+                            Command="{Binding AddExistingProductCommand}" />
+                    <Button Content="Відкрити товар"
+                            Padding="12,6"
+                            Margin="0,0,8,8"
+                            Command="{Binding OpenProductCommand}" />
+                    <Button Content="Видалити товар"
+                            Padding="12,6"
+                            Margin="0,0,0,8"
+                            Command="{Binding DeleteSelectedProductCommand}" />
+                </WrapPanel>
+            </StackPanel>
+
+            <Border Grid.Row="4"
+                    Margin="0,0,0,12"
+                    Padding="16"
+                    Background="#FFF8F8F8"
+                    CornerRadius="8"
+                    BorderBrush="#FFE1E1E1"
+                    BorderThickness="1"
+                    Visibility="{Binding IsAddNewProductMode, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="150" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0"
+                               Grid.ColumnSpan="2"
+                               Text="Новий товар"
+                               FontSize="18"
+                               FontWeight="SemiBold"
+                               Margin="0,0,0,12" />
+
+                    <TextBlock Grid.Row="1"
+                               Grid.Column="0"
+                               Text="Назва"
+                               FontWeight="SemiBold"
+                               Margin="0,0,12,10" />
+                    <TextBox Grid.Row="1"
+                             Grid.Column="1"
+                             Height="34"
+                             Padding="10,6"
+                             Text="{Binding NewProductName, UpdateSourceTrigger=PropertyChanged}"
+                             Margin="0,0,0,10" />
+
+                    <TextBlock Grid.Row="2"
+                               Grid.Column="0"
+                               Text="Категорія"
+                               FontWeight="SemiBold"
+                               Margin="0,0,12,10" />
+                    <ComboBox Grid.Row="2"
+                              Grid.Column="1"
+                              Height="34"
+                              ItemsSource="{Binding ProductCategories}"
+                              SelectedItem="{Binding NewSelectedProductCategory}"
+                              Margin="0,0,0,10" />
+
+                    <TextBlock Grid.Row="3"
+                               Grid.Column="0"
+                               Text="Кількість"
+                               FontWeight="SemiBold"
+                               Margin="0,0,12,10" />
+                    <TextBox Grid.Row="3"
+                             Grid.Column="1"
+                             Height="34"
+                             Padding="10,6"
+                             Text="{Binding NewProductQuantityText, UpdateSourceTrigger=PropertyChanged}"
+                             Margin="0,0,0,10" />
+
+                    <TextBlock Grid.Row="4"
+                               Grid.Column="0"
+                               Text="Ціна"
+                               FontWeight="SemiBold"
+                               Margin="0,0,12,10" />
+                    <TextBox Grid.Row="4"
+                             Grid.Column="1"
+                             Height="34"
+                             Padding="10,6"
+                             Text="{Binding NewProductPriceText, UpdateSourceTrigger=PropertyChanged}"
+                             Margin="0,0,0,10" />
+
+                    <TextBlock Grid.Row="5"
+                               Grid.Column="0"
+                               Text="Опис"
+                               FontWeight="SemiBold"
+                               Margin="0,0,12,10" />
+                    <TextBox Grid.Row="5"
+                             Grid.Column="1"
+                             MinHeight="90"
+                             Padding="10,8"
+                             AcceptsReturn="True"
+                             TextWrapping="Wrap"
+                             VerticalScrollBarVisibility="Auto"
+                             Text="{Binding NewProductDescription, UpdateSourceTrigger=PropertyChanged}"
+                             Margin="0,0,0,10" />
+
+                    <StackPanel Grid.Row="6"
+                                Grid.Column="1"
+                                Orientation="Horizontal"
+                                HorizontalAlignment="Left">
+                        <Button Content="Зберегти товар"
+                                Padding="12,6"
+                                Margin="0,0,8,0"
+                                Command="{Binding SaveNewProductCommand}" />
+                        <Button Content="Скасувати"
+                                Padding="12,6"
+                                Command="{Binding CancelAddProductCommand}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <Border Grid.Row="5"
+                    Margin="0,0,0,12"
+                    Padding="16"
+                    Background="#FFF8F8F8"
+                    CornerRadius="8"
+                    BorderBrush="#FFE1E1E1"
+                    BorderThickness="1"
+                    Visibility="{Binding IsAddExistingProductMode, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="170" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0"
+                               Grid.ColumnSpan="2"
+                               Text="Існуючий товар"
+                               FontSize="18"
+                               FontWeight="SemiBold"
+                               Margin="0,0,0,12" />
+
+                    <TextBlock Grid.Row="1"
+                               Grid.Column="0"
+                               Text="Оберіть товар"
+                               FontWeight="SemiBold"
+                               Margin="0,0,12,10" />
+                    <ComboBox Grid.Row="1"
+                              Grid.Column="1"
+                              Height="34"
+                              ItemsSource="{Binding ExistingProducts}"
+                              SelectedItem="{Binding SelectedExistingProduct}"
+                              DisplayMemberPath="DisplayName"
+                              Margin="0,0,0,10" />
+
+                    <TextBlock Grid.Row="2"
+                               Grid.Column="0"
+                               Text="Категорія"
+                               FontWeight="SemiBold"
+                               Margin="0,0,12,10" />
+                    <TextBlock Grid.Row="2"
+                               Grid.Column="1"
+                               VerticalAlignment="Center"
+                               Text="{Binding SelectedExistingProductCategoryName}"
+                               Margin="0,0,0,10" />
+
+                    <TextBlock Grid.Row="3"
+                               Grid.Column="0"
+                               Text="Ціна"
+                               FontWeight="SemiBold"
+                               Margin="0,0,12,10" />
+                    <TextBlock Grid.Row="3"
+                               Grid.Column="1"
+                               VerticalAlignment="Center"
+                               Text="{Binding SelectedExistingProductPriceDisplay}"
+                               Margin="0,0,0,10" />
+
+                    <TextBlock Grid.Row="4"
+                               Grid.Column="0"
+                               Text="Склад-джерело"
+                               FontWeight="SemiBold"
+                               Margin="0,0,12,10" />
+                    <TextBlock Grid.Row="4"
+                               Grid.Column="1"
+                               VerticalAlignment="Center"
+                               Text="{Binding SelectedExistingProductSourceWarehouseName}"
+                               Margin="0,0,0,10" />
+
+                    <TextBlock Grid.Row="5"
+                               Grid.Column="0"
+                               Text="Кількість на джерелі"
+                               FontWeight="SemiBold"
+                               Margin="0,0,12,10" />
+                    <TextBlock Grid.Row="5"
+                               Grid.Column="1"
+                               VerticalAlignment="Center"
+                               Text="{Binding SelectedExistingProductSourceQuantityDisplay}"
+                               Margin="0,0,0,10" />
+
+                    <TextBlock Grid.Row="6"
+                               Grid.Column="0"
+                               Text="Кількість для складу"
+                               FontWeight="SemiBold"
+                               Margin="0,0,12,10" />
+                    <TextBox Grid.Row="6"
+                             Grid.Column="1"
+                             Height="34"
+                             Padding="10,6"
+                             Text="{Binding ExistingProductQuantityText, UpdateSourceTrigger=PropertyChanged}"
+                             Margin="0,0,0,10" />
+
+                    <TextBlock Grid.Row="7"
+                               Grid.Column="0"
+                               Text="Опис"
+                               FontWeight="SemiBold"
+                               Margin="0,0,12,10" />
+                    <DockPanel Grid.Row="7"
+                               Grid.Column="1">
+                        <TextBlock Text="{Binding SelectedExistingProductDescription}"
+                                   TextWrapping="Wrap"
+                                   Margin="0,0,0,10" />
+                    </DockPanel>
+                </Grid>
+            </Border>
+
+            <StackPanel Grid.Row="6"
+                        Orientation="Horizontal"
+                        Margin="0,0,0,12"
+                        Visibility="{Binding IsAddExistingProductMode, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Button Content="Додати існуючий товар"
+                        Padding="12,6"
+                        Margin="0,0,8,0"
+                        Command="{Binding SaveExistingProductCommand}" />
+                <Button Content="Скасувати"
+                        Padding="12,6"
+                        Command="{Binding CancelAddProductCommand}" />
+            </StackPanel>
+
+            <Border Grid.Row="7"
+                    Background="#FFF8F8F8"
+                    BorderBrush="#FFE1E1E1"
+                    BorderThickness="1"
+                    CornerRadius="8">
+                <DataGrid ItemsSource="{Binding Products}"
+                          Height="260"
+                          SelectedItem="{Binding SelectedProduct, Mode=TwoWay}"
+                          AutoGenerateColumns="False"
+                          CanUserAddRows="False"
+                          CanUserDeleteRows="False"
+                          IsReadOnly="True"
+                          BorderThickness="0"
+                          HeadersVisibility="Column"
+                          GridLinesVisibility="Horizontal"
+                          RowHeaderWidth="0"
+                          SelectionMode="Single">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="80" />
+                        <DataGridTextColumn Header="Назва" Binding="{Binding Name}" Width="2*" />
+                        <DataGridTextColumn Header="Категорія" Binding="{Binding CategoryName}" Width="*" />
+                        <DataGridTextColumn Header="Кількість" Binding="{Binding Quantity}" Width="*" />
+                        <DataGridTextColumn Header="Ціна" Binding="{Binding Price, StringFormat={}{0:C2}}" Width="*" />
+                        <DataGridTextColumn Header="Вартість" Binding="{Binding TotalValue, StringFormat={}{0:C2}}" Width="1.2*" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Border>
+
+            <Border Grid.RowSpan="8"
+                    Background="#66FFFFFF"
+                    Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Width="260">
+                    <ProgressBar Height="16"
+                                 IsIndeterminate="True" />
+                    <TextBlock Text="{Binding BusyMessage}"
+                               Margin="0,12,0,0"
+                               HorizontalAlignment="Center"
+                               FontWeight="SemiBold" />
+                </StackPanel>
+            </Border>
+        </Grid>
+    </ScrollViewer>
 </UserControl>

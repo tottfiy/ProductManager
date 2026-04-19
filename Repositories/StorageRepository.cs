@@ -29,32 +29,100 @@ public class StorageRepository : IStorageRepository
 
     public async Task<IReadOnlyCollection<WarehouseEntity>> GetWarehousesAsync(CancellationToken cancellationToken = default)
     {
-
+        await _syncLock.WaitAsync(cancellationToken);
+        try
+        {
+            AppStorageData data = await ReadDataInternalAsync(cancellationToken);
+            return data.Warehouses.Select(CloneWarehouse).ToList();
+        }
+        finally
+        {
+            _syncLock.Release();
+        }
     }
 
     public async Task<WarehouseEntity?> GetWarehouseByIdAsync(int id, CancellationToken cancellationToken = default)
     {
-
+        await _syncLock.WaitAsync(cancellationToken);
+        try
+        {
+            AppStorageData data = await ReadDataInternalAsync(cancellationToken);
+            WarehouseEntity? warehouse = data.Warehouses.FirstOrDefault(item => item.Id == id);
+            return warehouse is null ? null : CloneWarehouse(warehouse);
+        }
+        finally
+        {
+            _syncLock.Release();
+        }
     }
 
     public async Task<IReadOnlyCollection<ProductEntity>> GetProductsAsync(CancellationToken cancellationToken = default)
     {
-
+        await _syncLock.WaitAsync(cancellationToken);
+        try
+        {
+            AppStorageData data = await ReadDataInternalAsync(cancellationToken);
+            return data.Products.Select(CloneProduct).ToList();
+        }
+        finally
+        {
+            _syncLock.Release();
+        }
     }
 
     public async Task<IReadOnlyCollection<ProductEntity>> GetProductsByWarehouseAsync(Guid warehouseGuid, CancellationToken cancellationToken = default)
     {
-
+        await _syncLock.WaitAsync(cancellationToken);
+        try
+        {
+            AppStorageData data = await ReadDataInternalAsync(cancellationToken);
+            return data.Products
+                .Where(product => product.StorageGuid == warehouseGuid)
+                .Select(CloneProduct)
+                .ToList();
+        }
+        finally
+        {
+            _syncLock.Release();
+        }
     }
 
     public async Task<ProductEntity?> GetProductByIdAsync(int id, CancellationToken cancellationToken = default)
     {
-
+        await _syncLock.WaitAsync(cancellationToken);
+        try
+        {
+            AppStorageData data = await ReadDataInternalAsync(cancellationToken);
+            ProductEntity? product = data.Products.FirstOrDefault(item => item.Id == id);
+            return product is null ? null : CloneProduct(product);
+        }
+        finally
+        {
+            _syncLock.Release();
+        }
     }
 
     public async Task<WarehouseEntity> AddWarehouseAsync(string name, Location location, CancellationToken cancellationToken = default)
     {
+        await _syncLock.WaitAsync(cancellationToken);
+        try
+        {
+            AppStorageData data = await ReadDataInternalAsync(cancellationToken);
 
+            WarehouseEntity warehouse = new(
+                id: data.NextWarehouseId++,
+                name: name,
+                location: location);
+
+            data.Warehouses.Add(warehouse);
+            await SaveDataInternalAsync(data, cancellationToken);
+
+            return CloneWarehouse(warehouse);
+        }
+        finally
+        {
+            _syncLock.Release();
+        }
     }
 
     public async Task<bool> UpdateWarehouseAsync(int id, string name, Location location, CancellationToken cancellationToken = default)
@@ -114,7 +182,85 @@ public class StorageRepository : IStorageRepository
         string? description,
         CancellationToken cancellationToken = default)
     {
+        await _syncLock.WaitAsync(cancellationToken);
+        try
+        {
+            AppStorageData data = await ReadDataInternalAsync(cancellationToken);
+            WarehouseEntity? warehouse = data.Warehouses.FirstOrDefault(item => item.Id == warehouseId);
+            if (warehouse is null)
+            {
+                return null;
+            }
 
+            ProductEntity product = new(
+                id: data.NextProductId++,
+                name: name,
+                quantity: quantity,
+                storageGuid: warehouse.Guid,
+                price: price,
+                productCategory: productCategory,
+                description: description);
+
+            data.Products.Add(product);
+            await SaveDataInternalAsync(data, cancellationToken);
+
+            return CloneProduct(product);
+        }
+        finally
+        {
+            _syncLock.Release();
+        }
+    }
+
+    public async Task<ProductEntity?> AddExistingProductToWarehouseAsync(
+        int targetWarehouseId,
+        int sourceProductId,
+        int quantity,
+        CancellationToken cancellationToken = default)
+    {
+        await _syncLock.WaitAsync(cancellationToken);
+        try
+        {
+            AppStorageData data = await ReadDataInternalAsync(cancellationToken);
+            WarehouseEntity? warehouse = data.Warehouses.FirstOrDefault(item => item.Id == targetWarehouseId);
+            ProductEntity? sourceProduct = data.Products.FirstOrDefault(item => item.Id == sourceProductId);
+            if (warehouse is null || sourceProduct is null)
+            {
+                return null;
+            }
+
+            ProductEntity? existingProductInWarehouse = data.Products.FirstOrDefault(product =>
+                product.StorageGuid == warehouse.Guid &&
+                product.Name == sourceProduct.Name &&
+                product.ProductCategory == sourceProduct.ProductCategory &&
+                product.Price == sourceProduct.Price &&
+                string.Equals(product.Description, sourceProduct.Description, StringComparison.Ordinal));
+
+            if (existingProductInWarehouse is not null)
+            {
+                existingProductInWarehouse.Quantity += quantity;
+                await SaveDataInternalAsync(data, cancellationToken);
+                return CloneProduct(existingProductInWarehouse);
+            }
+
+            ProductEntity product = new(
+                id: data.NextProductId++,
+                name: sourceProduct.Name,
+                quantity: quantity,
+                storageGuid: warehouse.Guid,
+                price: sourceProduct.Price,
+                productCategory: sourceProduct.ProductCategory,
+                description: sourceProduct.Description);
+
+            data.Products.Add(product);
+            await SaveDataInternalAsync(data, cancellationToken);
+
+            return CloneProduct(product);
+        }
+        finally
+        {
+            _syncLock.Release();
+        }
     }
 
     public async Task<bool> UpdateProductAsync(
@@ -258,5 +404,23 @@ public class StorageRepository : IStorageRepository
                 new ProductEntity(12, "Салат айсберг", 100, warehouse2.Guid, 25.5m, ProductCategory.Food, "Iceberg")
             ]
         };
+    }
+
+    private static WarehouseEntity CloneWarehouse(WarehouseEntity warehouse)
+    {
+        return new WarehouseEntity(warehouse.Guid, warehouse.Id, warehouse.Name, warehouse.Location);
+    }
+
+    private static ProductEntity CloneProduct(ProductEntity product)
+    {
+        return new ProductEntity(
+            product.Guid,
+            product.Id,
+            product.Name,
+            product.Quantity,
+            product.StorageGuid,
+            product.Price,
+            product.ProductCategory,
+            product.Description);
     }
 }

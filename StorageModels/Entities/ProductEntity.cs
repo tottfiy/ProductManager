@@ -4,57 +4,9 @@ namespace StorageModels.Entities;
 
 public class ProductEntity
 {
-    private readonly Guid _guid;
-    private int _id;
-    private Guid _storageGuid;
-    private string _name;
-    private int _quantity;
-    private decimal _price;
-    private ProductCategory _productCategory;
-    private string? _description;
-
-    public Guid Guid => _guid;
-
-    public int Id
+    public ProductEntity()
     {
-        get => _id;
-        private set => _id = value;
-    }
-
-    public Guid StorageGuid
-    {
-        get => _storageGuid;
-        private set => _storageGuid = value;
-    }
-
-    public string Name
-    {
-        get => _name;
-        set => _name = value;
-    }
-
-    public int Quantity
-    {
-        get => _quantity;
-        set => _quantity = value;
-    }
-
-    public decimal Price
-    {
-        get => _price;
-        set => _price = value;
-    }
-
-    public ProductCategory ProductCategory
-    {
-        get => _productCategory;
-        set => _productCategory = value;
-    }
-
-    public string? Description
-    {
-        get => _description;
-        set => _description = value;
+        Name = string.Empty;
     }
 
     public ProductEntity(
@@ -65,14 +17,43 @@ public class ProductEntity
         decimal price,
         ProductCategory productCategory,
         string? description = null)
+        : this(Guid.NewGuid(), id, name, quantity, storageGuid, price, productCategory, description)
     {
-        _guid = Guid.NewGuid();
-        _id = id;
-        _storageGuid = storageGuid;
-        _name = name;
-        _quantity = quantity;
-        _price = price;
-        _productCategory = productCategory;
-        _description = description;
     }
+
+    public ProductEntity(
+        Guid guid,
+        int id,
+        string name,
+        int quantity,
+        Guid storageGuid,
+        decimal price,
+        ProductCategory productCategory,
+        string? description = null)
+    {
+        Guid = guid;
+        Id = id;
+        Name = name;
+        Quantity = quantity;
+        StorageGuid = storageGuid;
+        Price = price;
+        ProductCategory = productCategory;
+        Description = description;
+    }
+
+    public Guid Guid { get; set; }
+
+    public int Id { get; set; }
+
+    public Guid StorageGuid { get; set; }
+
+    public string Name { get; set; }
+
+    public int Quantity { get; set; }
+
+    public decimal Price { get; set; }
+
+    public ProductCategory ProductCategory { get; set; }
+
+    public string? Description { get; set; }
 }

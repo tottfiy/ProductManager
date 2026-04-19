@@ -4,6 +4,8 @@
              xmlns:viewModels="clr-namespace:UIModels.ViewModels.Pages"
              xmlns:views="clr-namespace:UIModels.Views.Pages">
     <Application.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+
         <DataTemplate DataType="{x:Type viewModels:HomePageViewModel}">
             <views:HomePageView />
         </DataTemplate>

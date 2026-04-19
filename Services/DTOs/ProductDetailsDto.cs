@@ -1,80 +1,26 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
+using StorageModels.Enums;
 
-namespace Services.DTOs
+namespace Services.DTOs;
+
+public class ProductDetailsDto
 {
-    public class ProductDetailsDto
-    {
-        // Fields
-        private readonly int _id;
-        private string _name;
-        private string _categoryName;
-        private int _quantity;
-        private decimal _price;
-        private decimal _totalValue;
-        private string? _description;
-        private string _warehouseName;
+    public int Id { get; set; }
 
-        // Properties
-        public int Id
-        {
-            get { return _id; }
-        }
+    public int WarehouseId { get; set; }
 
-        public string Name
-        {
-            get { return _name; }
-            set { _name = value; }
-        }
+    public string WarehouseName { get; set; } = string.Empty;
 
-        public string CategoryName
-        {
-            get { return _categoryName; }
-            set { _categoryName = value; }
-        }
+    public string Name { get; set; } = string.Empty;
 
-        public int Quantity
-        {
-            get { return _quantity; }
-            set { _quantity = value; }
-        }
+    public ProductCategory Category { get; set; }
 
-        public decimal Price
-        {
-            get { return _price; }
-            set { _price = value; }
-        }
+    public string CategoryName { get; set; } = string.Empty;
 
-        public decimal TotalValue
-        {
-            get { return _totalValue; }
-            set { _totalValue = value; }
-        }
+    public int Quantity { get; set; }
 
-        public string? Description
-        {
-            get { return _description; }
-            set { _description = value; }
-        }
+    public decimal Price { get; set; }
 
-        public string WarehouseName
-        {
-            get { return _warehouseName; }
-            set { _warehouseName = value; }
-        }
+    public decimal TotalValue { get; set; }
 
-        // Constructor
-        public ProductDetailsDto(int id, string name, string categoryName, int quantity, decimal price, decimal totalValue, string? description, string warehouseName)
-        {
-            _id = id;
-            _name = name;
-            _categoryName = categoryName;
-            _quantity = quantity;
-            _price = price;
-            _totalValue = totalValue;
-            _description = description;
-            _warehouseName = warehouseName;
-        }
-    }
+    public string Description { get; set; } = string.Empty;
 }

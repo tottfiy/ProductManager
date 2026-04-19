@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using Services;
 using Services.DependencyInjection;
 using UIModels.Navigation;
 using UIModels.ViewModels;
@@ -15,17 +16,33 @@ public static class AppHost
         services.AddStorageServices();
 
         services.AddSingleton<NavigationStore>();
-        services.AddSingleton<INavigationService, NavigationService>();
 
         services.AddTransient<HomePageViewModel>();
-        services.AddTransient<Func<int, WarehouseDetailsPageViewModel>>(serviceProvider =>
-            warehouseId => ActivatorUtilities.CreateInstance<WarehouseDetailsPageViewModel>(serviceProvider, warehouseId));
-        services.AddTransient<Func<int, ProductDetailsPageViewModel>>(serviceProvider =>
-            productId => ActivatorUtilities.CreateInstance<ProductDetailsPageViewModel>(serviceProvider, productId));
+        services.AddSingleton<Func<HomePageViewModel>>(serviceProvider =>
+            () => new HomePageViewModel(
+                serviceProvider.GetRequiredService<IStorageService>(),
+                serviceProvider.GetRequiredService<INavigationService>()));
+        services.AddSingleton<Func<int?, WarehouseDetailsPageViewModel>>(serviceProvider =>
+            warehouseId => new WarehouseDetailsPageViewModel(
+                serviceProvider.GetRequiredService<IStorageService>(),
+                serviceProvider.GetRequiredService<INavigationService>(),
+                warehouseId));
+        services.AddSingleton<Func<int?, int?, ProductDetailsPageViewModel>>(serviceProvider =>
+            (productId, warehouseId) => new ProductDetailsPageViewModel(
+                serviceProvider.GetRequiredService<IStorageService>(),
+                serviceProvider.GetRequiredService<INavigationService>(),
+                productId,
+                warehouseId));
+
+        services.AddSingleton<INavigationService, NavigationService>();
 
         services.AddSingleton<MainWindowViewModel>();
         services.AddSingleton<MainWindow>();
 
-        return services.BuildServiceProvider();
+        return services.BuildServiceProvider(new ServiceProviderOptions
+        {
+            ValidateOnBuild = true,
+            ValidateScopes = true
+        });
     }
 }

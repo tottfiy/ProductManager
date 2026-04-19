@@ -4,31 +4,29 @@ namespace StorageModels.Entities;
 
 public class WarehouseEntity
 {
-    private readonly Guid _guid;
-    private readonly int _id;
-    private string _name;
-    private Location _location;
-
-    public Guid Guid => _guid;
-    public int Id => _id;
-
-    public string Name
+    public WarehouseEntity()
     {
-        get => _name;
-        set => _name = value;
-    }
-
-    public Location Location
-    {
-        get => _location;
-        set => _location = value;
+        Name = string.Empty;
     }
 
     public WarehouseEntity(int id, string name, Location location)
+        : this(Guid.NewGuid(), id, name, location)
     {
-        _guid = Guid.NewGuid();
-        _id = id;
-        _name = name;
-        _location = location;
     }
+
+    public WarehouseEntity(Guid guid, int id, string name, Location location)
+    {
+        Guid = guid;
+        Id = id;
+        Name = name;
+        Location = location;
+    }
+
+    public Guid Guid { get; set; }
+
+    public int Id { get; set; }
+
+    public string Name { get; set; }
+
+    public Location Location { get; set; }
 }

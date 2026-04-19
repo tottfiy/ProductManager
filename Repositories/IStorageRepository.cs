@@ -21,6 +21,11 @@ public interface IStorageRepository
         ProductCategory productCategory,
         string? description,
         CancellationToken cancellationToken = default);
+    Task<ProductEntity?> AddExistingProductToWarehouseAsync(
+        int targetWarehouseId,
+        int sourceProductId,
+        int quantity,
+        CancellationToken cancellationToken = default);
     Task<bool> UpdateProductAsync(
         int productId,
         string name,

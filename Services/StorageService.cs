@@ -1,133 +1,270 @@
 using Repositories;
 using Services.DTOs;
 using StorageModels.Entities;
-using System.Collections.Generic;
 
-namespace Services
+namespace Services;
+
+public class StorageService : IStorageService
 {
-    public class StorageService : IStorageService
+    private readonly IStorageRepository _storageRepository;
+
+    public StorageService(IStorageRepository storageRepository)
     {
-        private readonly IStorageRepository _storageRepository;
+        _storageRepository = storageRepository;
+    }
 
-        public StorageService(IStorageRepository storageRepository)
-        {
-            _storageRepository = storageRepository;
-        }
+    public async Task<IReadOnlyCollection<WarehouseListDto>> GetWarehouseListAsync(CancellationToken cancellationToken = default)
+    {
+        IReadOnlyCollection<WarehouseEntity> warehouses = await _storageRepository.GetWarehousesAsync(cancellationToken);
+        IReadOnlyCollection<ProductEntity> products = await _storageRepository.GetProductsAsync(cancellationToken);
 
-        public IReadOnlyCollection<WarehouseListDto> GetWarehouseList()
-        {
-            var warehouses = _storageRepository.GetWarehouses();
-            var products = _storageRepository.GetProducts();
-
-            List<WarehouseListDto> warehouseDtos = new List<WarehouseListDto>();
-
-            foreach (var warehouse in warehouses)
+        return warehouses
+            .Select(warehouse =>
             {
-                int productCount = 0;
-                decimal totalValue = 0;
+                List<ProductEntity> warehouseProducts = products
+                    .Where(product => product.StorageGuid == warehouse.Guid)
+                    .ToList();
 
-                foreach (var product in products)
+                return new WarehouseListDto
                 {
-                    if (product.StorageGuid == warehouse.Guid)
-                    {
-                        productCount++;
-                        totalValue += product.Price * product.Quantity;
-                    }
-                }
+                    Id = warehouse.Id,
+                    Name = warehouse.Name,
+                    LocationName = warehouse.Location.ToString(),
+                    ProductCount = warehouseProducts.Count,
+                    TotalValue = warehouseProducts.Sum(product => product.Price * product.Quantity)
+                };
+            })
+            .ToList();
+    }
 
-                WarehouseListDto warehouseDto = new WarehouseListDto(
-                    warehouse.Id,
-                    warehouse.Name,
-                    warehouse.Location.ToString(),
-                    productCount,
-                    totalValue
-                );
-
-                warehouseDtos.Add(warehouseDto);
-            }
-
-            return warehouseDtos;
+    public async Task<WarehouseDetailsDto?> GetWarehouseDetailsAsync(int warehouseId, CancellationToken cancellationToken = default)
+    {
+        WarehouseEntity? warehouse = await _storageRepository.GetWarehouseByIdAsync(warehouseId, cancellationToken);
+        if (warehouse is null)
+        {
+            return null;
         }
 
-        public WarehouseDetailsDto? GetWarehouseDetails(int warehouseId)
+        IReadOnlyCollection<ProductEntity> products = await _storageRepository.GetProductsByWarehouseAsync(warehouse.Guid, cancellationToken);
+        List<ProductListDto> productDtos = products
+            .Select(product => new ProductListDto
+            {
+                Id = product.Id,
+                Name = product.Name,
+                Category = product.ProductCategory,
+                CategoryName = product.ProductCategory.ToString(),
+                Quantity = product.Quantity,
+                Price = product.Price,
+                TotalValue = product.Price * product.Quantity
+            })
+            .OrderBy(product => product.Name)
+            .ToList();
+
+        return new WarehouseDetailsDto
         {
-            WarehouseEntity? warehouse = _storageRepository.GetWarehouseById(warehouseId);
+            Id = warehouse.Id,
+            Name = warehouse.Name,
+            Location = warehouse.Location,
+            LocationName = warehouse.Location.ToString(),
+            TotalValue = productDtos.Sum(product => product.TotalValue),
+            Products = productDtos
+        };
+    }
 
-            if (warehouse == null)
-            {
-                return null;
-            }
-
-            List<ProductListDto> productDtos = new List<ProductListDto>();
-            decimal totalValue = 0;
-
-            foreach (var product in _storageRepository.GetProductsByWarehouse(warehouse.Guid))
-            {
-                decimal productTotalValue = product.Price * product.Quantity;
-
-                ProductListDto productDto = new ProductListDto(
-                    product.Id,
-                    product.Name,
-                    product.ProductCategory.ToString(),
-                    product.Quantity,
-                    product.Price,
-                    productTotalValue
-                );
-
-                productDtos.Add(productDto);
-                totalValue += productTotalValue;
-            }
-
-            WarehouseDetailsDto warehouseDetailsDto = new WarehouseDetailsDto(
-                warehouse.Id,
-                warehouse.Name,
-                warehouse.Location.ToString(),
-                totalValue,
-                productDtos
-            );
-
-            return warehouseDetailsDto;
+    public async Task<ProductDetailsDto?> GetProductDetailsAsync(int productId, CancellationToken cancellationToken = default)
+    {
+        ProductEntity? product = await _storageRepository.GetProductByIdAsync(productId, cancellationToken);
+        if (product is null)
+        {
+            return null;
         }
 
-        public ProductDetailsDto? GetProductDetails(int productId)
+        WarehouseEntity? warehouse = (await _storageRepository.GetWarehousesAsync(cancellationToken))
+            .FirstOrDefault(item => item.Guid == product.StorageGuid);
+
+        return new ProductDetailsDto
         {
-            ProductEntity? product = _storageRepository.GetProductById(productId);
+            Id = product.Id,
+            WarehouseId = warehouse?.Id ?? 0,
+            WarehouseName = warehouse?.Name ?? "Невідомий склад",
+            Name = product.Name,
+            Category = product.ProductCategory,
+            CategoryName = product.ProductCategory.ToString(),
+            Quantity = product.Quantity,
+            Price = product.Price,
+            TotalValue = product.Price * product.Quantity,
+            Description = string.IsNullOrWhiteSpace(product.Description) ? "—" : product.Description
+        };
+    }
 
-            if (product == null)
+    public async Task<IReadOnlyCollection<ExistingProductOptionDto>> GetExistingProductOptionsAsync(int warehouseId, CancellationToken cancellationToken = default)
+    {
+        WarehouseEntity? warehouse = await _storageRepository.GetWarehouseByIdAsync(warehouseId, cancellationToken);
+        if (warehouse is null)
+        {
+            return Array.Empty<ExistingProductOptionDto>();
+        }
+
+        IReadOnlyCollection<WarehouseEntity> warehouses = await _storageRepository.GetWarehousesAsync(cancellationToken);
+        IReadOnlyCollection<ProductEntity> products = await _storageRepository.GetProductsAsync(cancellationToken);
+
+        Dictionary<Guid, string> warehouseNames = warehouses.ToDictionary(item => item.Guid, item => item.Name);
+
+        return products
+            .Where(product => product.StorageGuid != warehouse.Guid)
+            .OrderBy(product => product.Name)
+            .ThenBy(product => warehouseNames.TryGetValue(product.StorageGuid, out string? sourceWarehouseName) ? sourceWarehouseName : string.Empty)
+            .Select(product => new ExistingProductOptionDto
             {
-                return null;
+                Id = product.Id,
+                Name = product.Name,
+                CategoryName = product.ProductCategory.ToString(),
+                Price = product.Price,
+                SourceWarehouseName = warehouseNames.TryGetValue(product.StorageGuid, out string? sourceWarehouseName)
+                    ? sourceWarehouseName
+                    : "Невідомий склад",
+                Description = string.IsNullOrWhiteSpace(product.Description) ? "—" : product.Description,
+                SourceQuantity = product.Quantity,
+                DisplayName = $"#{product.Id} · {product.Name} · {product.ProductCategory} · {product.Price:C2} · {GetWarehouseNameForDisplay(warehouseNames, product.StorageGuid)}"
+            })
+            .ToList();
+    }
+
+    public async Task<ProductDetailsDto?> AddExistingProductToWarehouseAsync(int warehouseId, int sourceProductId, int quantity, CancellationToken cancellationToken = default)
+    {
+        if (quantity <= 0)
+        {
+            throw new InvalidOperationException("Кількість для додавання існуючого товару повинна бути більшою за нуль.");
+        }
+
+        ProductEntity? product = await _storageRepository.AddExistingProductToWarehouseAsync(
+            warehouseId,
+            sourceProductId,
+            quantity,
+            cancellationToken);
+
+        if (product is null)
+        {
+            return null;
+        }
+
+        return await GetProductDetailsAsync(product.Id, cancellationToken);
+    }
+
+    public async Task<string?> GetWarehouseNameAsync(int warehouseId, CancellationToken cancellationToken = default)
+    {
+        WarehouseEntity? warehouse = await _storageRepository.GetWarehouseByIdAsync(warehouseId, cancellationToken);
+        return warehouse?.Name;
+    }
+
+    public async Task<WarehouseDetailsDto> SaveWarehouseAsync(WarehouseSaveDto warehouse, CancellationToken cancellationToken = default)
+    {
+        string name = warehouse.Name.Trim();
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new InvalidOperationException("Назва складу не може бути порожньою.");
+        }
+
+        int warehouseId;
+        if (warehouse.Id.HasValue)
+        {
+            bool updated = await _storageRepository.UpdateWarehouseAsync(
+                warehouse.Id.Value,
+                name,
+                warehouse.Location,
+                cancellationToken);
+
+            if (!updated)
+            {
+                throw new InvalidOperationException("Не вдалося оновити склад.");
             }
 
-            string warehouseName = "Невідомий склад";
+            warehouseId = warehouse.Id.Value;
+        }
+        else
+        {
+            WarehouseEntity createdWarehouse = await _storageRepository.AddWarehouseAsync(name, warehouse.Location, cancellationToken);
+            warehouseId = createdWarehouse.Id;
+        }
 
-            foreach (var warehouse in _storageRepository.GetWarehouses())
-            {
-                if (warehouse.Guid == product.StorageGuid)
-                {
-                    warehouseName = warehouse.Name;
-                    break;
-                }
-            }
+        WarehouseDetailsDto? warehouseDetails = await GetWarehouseDetailsAsync(warehouseId, cancellationToken);
+        return warehouseDetails ?? throw new InvalidOperationException("Не вдалося завантажити дані складу після збереження.");
+    }
 
-            string? description = product.Description;
+    public Task<bool> DeleteWarehouseAsync(int warehouseId, CancellationToken cancellationToken = default)
+    {
+        return _storageRepository.DeleteWarehouseAsync(warehouseId, cancellationToken);
+    }
 
-            if (string.IsNullOrWhiteSpace(description))
-            {
-                description = "—";
-            }
+    public async Task<ProductDetailsDto?> SaveProductAsync(ProductSaveDto product, CancellationToken cancellationToken = default)
+    {
+        string name = product.Name.Trim();
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new InvalidOperationException("Назва товару не може бути порожньою.");
+        }
 
-            ProductDetailsDto productDetailsDto = new ProductDetailsDto(
-                product.Id,
-                product.Name,
-                product.ProductCategory.ToString(),
+        if (product.Quantity < 0)
+        {
+            throw new InvalidOperationException("Кількість товару не може бути від’ємною.");
+        }
+
+        if (product.Price < 0)
+        {
+            throw new InvalidOperationException("Ціна товару не може бути від’ємною.");
+        }
+
+        int productId;
+        if (product.Id.HasValue)
+        {
+            bool updated = await _storageRepository.UpdateProductAsync(
+                product.Id.Value,
+                name,
                 product.Quantity,
                 product.Price,
-                product.Price * product.Quantity,
-                description,
-                warehouseName
-            );
+                product.Category,
+                product.Description,
+                cancellationToken);
 
-            return productDetailsDto;
+            if (!updated)
+            {
+                throw new InvalidOperationException("Не вдалося оновити товар.");
+            }
+
+            productId = product.Id.Value;
         }
+        else
+        {
+            ProductEntity? createdProduct = await _storageRepository.AddProductAsync(
+                product.WarehouseId,
+                name,
+                product.Quantity,
+                product.Price,
+                product.Category,
+                product.Description,
+                cancellationToken);
+
+            if (createdProduct is null)
+            {
+                return null;
+            }
+
+            productId = createdProduct.Id;
+        }
+
+        return await GetProductDetailsAsync(productId, cancellationToken);
     }
+
+    public Task<bool> DeleteProductAsync(int productId, CancellationToken cancellationToken = default)
+    {
+        return _storageRepository.DeleteProductAsync(productId, cancellationToken);
+    }
+
+    private static string GetWarehouseNameForDisplay(IReadOnlyDictionary<Guid, string> warehouseNames, Guid warehouseGuid)
+    {
+        return warehouseNames.TryGetValue(warehouseGuid, out string? warehouseName)
+            ? warehouseName
+            : "Невідомий склад";
+    }
+
 }

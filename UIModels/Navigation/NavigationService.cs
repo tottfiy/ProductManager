@@ -1,4 +1,3 @@
-using Microsoft.Extensions.DependencyInjection;
 using UIModels.ViewModels.Pages;
 
 namespace UIModels.Navigation;
@@ -6,18 +5,18 @@ namespace UIModels.Navigation;
 public class NavigationService : INavigationService
 {
     private readonly NavigationStore _navigationStore;
-    private readonly IServiceProvider _serviceProvider;
-    private readonly Func<int, WarehouseDetailsPageViewModel> _warehouseViewModelFactory;
-    private readonly Func<int, ProductDetailsPageViewModel> _productViewModelFactory;
+    private readonly Func<HomePageViewModel> _homeViewModelFactory;
+    private readonly Func<int?, WarehouseDetailsPageViewModel> _warehouseViewModelFactory;
+    private readonly Func<int?, int?, ProductDetailsPageViewModel> _productViewModelFactory;
 
     public NavigationService(
         NavigationStore navigationStore,
-        IServiceProvider serviceProvider,
-        Func<int, WarehouseDetailsPageViewModel> warehouseViewModelFactory,
-        Func<int, ProductDetailsPageViewModel> productViewModelFactory)
+        Func<HomePageViewModel> homeViewModelFactory,
+        Func<int?, WarehouseDetailsPageViewModel> warehouseViewModelFactory,
+        Func<int?, int?, ProductDetailsPageViewModel> productViewModelFactory)
     {
         _navigationStore = navigationStore;
-        _serviceProvider = serviceProvider;
+        _homeViewModelFactory = homeViewModelFactory;
         _warehouseViewModelFactory = warehouseViewModelFactory;
         _productViewModelFactory = productViewModelFactory;
 
@@ -25,29 +24,30 @@ public class NavigationService : INavigationService
     }
 
     public bool CanGoBack => _navigationStore.CanGoBack;
+
     public event Action? NavigationChanged;
 
     public void ShowHome(bool clearHistory = false)
     {
-        HomePageViewModel viewModel = _serviceProvider.GetRequiredService<HomePageViewModel>();
+        HomePageViewModel homeViewModel = _homeViewModelFactory();
 
         if (clearHistory)
         {
-            _navigationStore.ClearAndNavigate(viewModel);
+            _navigationStore.ClearAndNavigate(homeViewModel);
             return;
         }
 
-        _navigationStore.Navigate(viewModel);
+        _navigationStore.Navigate(homeViewModel);
     }
 
-    public void ShowWarehouseDetails(int warehouseId)
+    public void ShowWarehouseDetails(int? warehouseId = null)
     {
         _navigationStore.Navigate(_warehouseViewModelFactory(warehouseId));
     }
 
-    public void ShowProductDetails(int productId)
+    public void ShowProductDetails(int? productId = null, int? warehouseId = null)
     {
-        _navigationStore.Navigate(_productViewModelFactory(productId));
+        _navigationStore.Navigate(_productViewModelFactory(productId, warehouseId));
     }
 
     public void GoBack()

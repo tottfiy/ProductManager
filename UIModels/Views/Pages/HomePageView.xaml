@@ -1,72 +1,106 @@
 <UserControl x:Class="UIModels.Views.Pages.HomePageView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <DockPanel>
-        <TextBlock DockPanel.Dock="Top"
-                   Text="Warehouses"
-                   FontSize="26"
-                   FontWeight="Bold"
-                   Margin="0,0,0,16" />
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Loaded="OnLoaded"
+             DataContextChanged="OnDataContextChanged">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
 
-        <TextBlock DockPanel.Dock="Top"
-                   Text="Оберіть склад зі списку, щоб переглянути детальну інформацію та товари."
-                   Foreground="#FF555555"
-                   Margin="0,0,0,16" />
+        <StackPanel Grid.Row="0" Margin="0,0,0,16">
+            <TextBlock Text="Склади"
+                       FontSize="26"
+                       FontWeight="Bold" />
+            <TextBlock Text="Перегляд, пошук, сортування та керування складами."
+                       Foreground="#FF555555"
+                       Margin="0,6,0,0" />
+        </StackPanel>
 
-        <ListBox ItemsSource="{Binding Warehouses}"
-                 SelectedItem="{Binding SelectedWarehouse, Mode=TwoWay}"
-                 BorderThickness="0"
-                 Background="Transparent"
-                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-            <ListBox.ItemContainerStyle>
-                <Style TargetType="ListBoxItem">
-                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                    <Setter Property="VerticalContentAlignment" Value="Stretch" />
-                    <Setter Property="Padding" Value="0" />
-                    <Setter Property="Margin" Value="0,0,0,10" />
-                </Style>
-            </ListBox.ItemContainerStyle>
+        <Grid Grid.Row="1" Margin="0,0,0,12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*" />
+                <ColumnDefinition Width="220" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
 
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <Border Padding="14"
-                            Background="#FFF8F8F8"
-                            CornerRadius="8"
-                            BorderBrush="#FFE1E1E1"
-                            BorderThickness="1"
-                            HorizontalAlignment="Stretch">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="2.4*" />
-                                <ColumnDefinition Width="1.1*" />
-                                <ColumnDefinition Width="1.5*" />
-                            </Grid.ColumnDefinitions>
+            <TextBox Grid.Column="0"
+                     Height="34"
+                     Padding="10,6"
+                     VerticalContentAlignment="Center"
+                     Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
 
-                            <StackPanel Grid.Column="0"
-                                        VerticalAlignment="Center">
-                                <TextBlock Text="{Binding Name}"
-                                           FontSize="18"
-                                           FontWeight="SemiBold"
-                                           TextWrapping="Wrap" />
-                                <TextBlock Text="{Binding LocationName, StringFormat=Локація: {0}}"
-                                           Margin="0,6,0,0" />
-                            </StackPanel>
+            <ComboBox Grid.Column="1"
+                      Margin="12,0,0,0"
+                      Height="34"
+                      ItemsSource="{Binding SortOptions}"
+                      SelectedItem="{Binding SelectedSortOption}" />
 
-                            <TextBlock Grid.Column="1"
-                                       HorizontalAlignment="Center"
-                                       VerticalAlignment="Center"
-                                       Text="{Binding ProductCount, StringFormat=Товарів: {0}}" />
+            <Button Grid.Column="2"
+                    Margin="12,0,0,0"
+                    Padding="14,6"
+                    Content="Оновити"
+                    Command="{Binding RefreshCommand}" />
+        </Grid>
 
-                            <TextBlock Grid.Column="2"
-                                       HorizontalAlignment="Right"
-                                       VerticalAlignment="Center"
-                                       FontWeight="SemiBold"
-                                       TextAlignment="Right"
-                                       Text="{Binding TotalValue, StringFormat=Загальна вартість: {0:C2}}" />
-                        </Grid>
-                    </Border>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
-    </DockPanel>
+        <StackPanel Grid.Row="2"
+                    Orientation="Horizontal"
+                    Margin="0,0,0,12">
+            <Button Content="Додати склад"
+                    Padding="14,6"
+                    Margin="0,0,8,0"
+                    Command="{Binding AddWarehouseCommand}" />
+            <Button Content="Відкрити"
+                    Padding="14,6"
+                    Margin="0,0,8,0"
+                    Command="{Binding OpenWarehouseCommand}" />
+            <Button Content="Видалити"
+                    Padding="14,6"
+                    Command="{Binding DeleteWarehouseCommand}" />
+        </StackPanel>
+
+        <Border Grid.Row="3"
+                Background="#FFF8F8F8"
+                BorderBrush="#FFE1E1E1"
+                BorderThickness="1"
+                CornerRadius="8">
+            <DataGrid ItemsSource="{Binding Warehouses}"
+                      SelectedItem="{Binding SelectedWarehouse, Mode=TwoWay}"
+                      AutoGenerateColumns="False"
+                      CanUserAddRows="False"
+                      CanUserDeleteRows="False"
+                      IsReadOnly="True"
+                      BorderThickness="0"
+                      HeadersVisibility="Column"
+                      GridLinesVisibility="Horizontal"
+                      RowHeaderWidth="0"
+                      SelectionMode="Single">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="80" />
+                    <DataGridTextColumn Header="Назва" Binding="{Binding Name}" Width="2*" />
+                    <DataGridTextColumn Header="Локація" Binding="{Binding LocationName}" Width="*" />
+                    <DataGridTextColumn Header="Товарів" Binding="{Binding ProductCount}" Width="*" />
+                    <DataGridTextColumn Header="Загальна вартість" Binding="{Binding TotalValue, StringFormat={}{0:C2}}" Width="1.4*" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+
+        <Border Grid.RowSpan="4"
+                Background="#66FFFFFF"
+                Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Width="260">
+                <ProgressBar Height="16"
+                             IsIndeterminate="True" />
+                <TextBlock Text="{Binding BusyMessage}"
+                           Margin="0,12,0,0"
+                           HorizontalAlignment="Center"
+                           FontWeight="SemiBold" />
+            </StackPanel>
+        </Border>
+    </Grid>
 </UserControl>
